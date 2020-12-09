@@ -1,51 +1,37 @@
 import dash
-import dash_html_components as html
-
-from dash.dependencies import Input, Output, State
-from dash_table import DataTable
-
+from dash.dependencies import Input, Output
+import dash_table
 import pandas as pd
+import dash_html_components as html
+import dash_core_components as dcc
 
-url = "https://github.com/plotly/datasets/raw/master/" "26k-consumer-complaints.csv"
-df = pd.read_csv(url)
+
 
 app = dash.Dash(__name__)
-app.scripts.config.serve_locally = True
 
-columns = [
-    {"id": 0, "name": "Complaint ID"},
-    {"id": 1, "name": "Product"},
-    {"id": 2, "name": "Sub-product"},
-    {"id": 3, "name": "Issue"},
-    {"id": 4, "name": "Sub-issue"},
-    {"id": 5, "name": "State"},
-    {"id": 6, "name": "ZIP"},
-    {"id": 7, "name": "code"},
-    {"id": 8, "name": "Date received"},
-    {"id": 9, "name": "Date sent to company"},
-    {"id": 10, "name": "Company"},
-    {"id": 11, "name": "Company response"},
-    {"id": 12, "name": "Timely response?"},
-    {"id": 13, "name": "Consumer disputed?"},
-]
+PAGE_SIZE = 5
 
-app.layout = html.Div([
-    html.Button(
-        ['Update'],
-        id='btn'
-    ),
-    DataTable(
-        id='table',
-        data=[]
-    )
-])
+app.layout = html.Div(children=[html.Div(id='test')]+[dcc.Input(id='datatable-paging')])
 
 @app.callback(
-    [Output("table", "data"), Output('table', 'columns')],
-    [Input("btn", "n_clicks")]
-)
-def updateTable(n_clicks):
-    if n_clicks is None:
-        return df.values[0:100], columns
+    Output('test', 'children'),
+    Input('datatable-paging', "page_current")
+ #   Input('datatable-paging', "page_size"))
+    )
+def update_table(page_current,page_size):
+    df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 
-    return df.values[100:110], columns[0:3]
+    df[' index'] = range(1, len(df) + 1)
+
+    print(df)
+    return dash_table.DataTable(
+    id='test',
+    data = df.iloc[:].to_dict('records'),
+    page_current=0,
+    page_size=PAGE_SIZE,
+    page_action='custom'
+)
+
+
+if __name__ == '__main__':
+    app.run_server(debug=True)

@@ -7,41 +7,81 @@ from dash.dependencies import Input, Output
 from mortgagecalc import linearmortgage
 import dash_table 
 import pandas
+import pdb
+import plotly.graph_objs as go
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+#["style.css"]
+#external_stylesheets = ['https://codepen.io/zootia/pen/MweMmB']
 
+df = pandas.DataFrame()
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 #df = pandas.DataFrame()
 
-app.layout = html.Div(children=[
-    html.Label('Text Input'),
-    dcc.Input(value=0, id="input_number", type='number', debounce=True),
-    #dash_table.DataTable(id="table")
-        ]
-#+ [html.Div(id="out-all-types")]
-+ [dash_table.DataTable(
-  #  data=[],
-    #columns=[],
-    columns=[{'id': c, 'name': c} for c in ['x','y','z','a','b']],
- #   page_size=10,
-    id='table'
-)]
+# app.layout = html.Div(children=
+#         [ html.Div(#className='test', 
+#             children=
+#                 [
+#                     html.Label('Mortgage Amount', id='mortamount'),
+#                     dcc.Input(value=0, id="mortgageamount", type='number'),
+#                     html.Label('Interest Rate', id='intrate'),
+#                     dcc.Input(value=1.9, id='interestrate', type='number'),
+#                     html.Label('Years of repayment', id='yearrepay'),
+#                     dcc.Input(value=30, id='repaymentyears', type='number', debounce=True) 
+#                 ]
+#             )]+
+#         [html.Div(children=[
+#         [html.Label('Total Interest'), html.Div(id='total_interest')]
+#         + [html.Label('First Monthly Payment'), html.Div(id='first_monthly_payment')]
+#         + [html.Label('Last Monthly Payment'), html.Div(id='last_monthly_payment')]
+# #+ [html.Label(''), html.Div(id='test')]
+#         ])]
+#     )
+
+app.layout = html.Div( className='test',
+            children=
+        [    
+        html.Label('Mortgage Amount', id='mortamount'),
+        dcc.Input(value=0, id="mortgageamount", type='number'),
+        html.Label('Interest Rate', id='intrate'),
+        dcc.Input(value=1.9, id='interestrate', type='number'),
+        html.Label('Years of repayment', id='yearrepay'),
+        dcc.Input(value=30, id='repaymentyears', type='number', debounce=True)]
+        +[html.Label('Total Interest'), html.Div(id='total_interest')]
+        + [html.Label('First Monthly Payment'), html.Div(id='first_monthly_payment')]
+        + [html.Label('Last Monthly Payment'), html.Div(id='last_monthly_payment')]
+
+#+ [html.Label(''), html.Div(id='test')]
+        #+[dcc.Graph(id='graph', )]
+      #+ [dcc.Graph(id='linebar', figure={go.})]
 )
 
+#pdb.set_trace()
 
 @app.callback(
-    Output("table", "data"),
+   # Output("table", "data"),
+    Output("total_interest", "children"),
+    Output("first_monthly_payment", "children"),
+    Output("last_monthly_payment", "children"),
+    
    # Output("table", "rows"),
-    [Input("input_number", "value") ]
+    [Input("mortgageamount", "value"), Input('interestrate', "value"), 
+        Input('repaymentyears', "value") ]
+    
 )
-def cb_render(input_number):
-    if input_number != 0:
-        df = pandas.DataFrame(linearmortgage(input_number)).T
+def cb_render(mortgageamount,interestrate, repaymentyears):
+    print(mortgageamount)
+    if mortgageamount is None or mortgageamount == 0:
+        print("It also enters here")
+        return 0, 0, 0 
+    else:
+        df = pandas.DataFrame(linearmortgage(mortgageamount, rate=interestrate, time=repaymentyears)).T
+        df.columns = ['principal', 'rprincipal', 'fixedpayment', 
+                        'monthlyinterest', 'monthlypayment']
         print("here we are ")
         print(df)
-        return df.iloc[0:100].to_dict('records')
-    else:
-        return 
+        return df['monthlyinterest'].sum(), df['monthlypayment'][0], df['monthlypayment'].iloc[-1]
+
 
 
 if __name__ == '__main__':

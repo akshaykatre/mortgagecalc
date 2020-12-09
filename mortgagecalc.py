@@ -23,7 +23,7 @@ def mip(principal, rate):
     return principal*(rate/100)/12
 
 
-def linearmortgage(principal, rate=1.9, time=30):
+def linearmortgage(principal=0, rate=1.9, time=30):
     timeinmonths = time*12
     rprincipal = principal
     fixedpayment = fpp(rprincipal, timeinmonths)
@@ -38,4 +38,11 @@ def linearmortgage(principal, rate=1.9, time=30):
         rprincipal -= fixedpayment
     return data 
 
+def annuity(principal, rate, time):
+    oner = (1+(rate/12))**(-time*12)
+    onem = 1 - oner
+    oned = onem/(rate/12)
+    #print(oner, onem, oned, principal, rate, time)
+    return round(principal/oned, 2)
 
+#def annuitymortgage():
