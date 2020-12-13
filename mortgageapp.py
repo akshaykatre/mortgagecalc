@@ -4,7 +4,7 @@ import dash_html_components as html
 import plotly.express as px
 import pandas as pd
 from dash.dependencies import Input, Output
-from mortgagecalc import linearmortgage
+from mortgagecalc import linearmortgage, annuity
 import dash_table 
 import pandas
 import pdb
@@ -17,26 +17,6 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 df = pandas.DataFrame()
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 #df = pandas.DataFrame()
-
-# app.layout = html.Div(children=
-#         [ html.Div(#className='test', 
-#             children=
-#                 [
-#                     html.Label('Mortgage Amount', id='mortamount'),
-#                     dcc.Input(value=0, id="mortgageamount", type='number'),
-#                     html.Label('Interest Rate', id='intrate'),
-#                     dcc.Input(value=1.9, id='interestrate', type='number'),
-#                     html.Label('Years of repayment', id='yearrepay'),
-#                     dcc.Input(value=30, id='repaymentyears', type='number', debounce=True) 
-#                 ]
-#             )]+
-#         [html.Div(children=[
-#         [html.Label('Total Interest'), html.Div(id='total_interest')]
-#         + [html.Label('First Monthly Payment'), html.Div(id='first_monthly_payment')]
-#         + [html.Label('Last Monthly Payment'), html.Div(id='last_monthly_payment')]
-# #+ [html.Label(''), html.Div(id='test')]
-#         ])]
-#     )
 
 app.layout = html.Div( className='test',
             children=

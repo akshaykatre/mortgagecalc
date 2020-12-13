@@ -38,11 +38,23 @@ def linearmortgage(principal=0, rate=1.9, time=30):
         rprincipal -= fixedpayment
     return data 
 
-def annuity(principal, rate, time):
-    oner = (1+(rate/12))**(-time*12)
+def annuity(principal=0, rate=1.9, time=30):
+    timeinmonths = time*12
+    
+    oner = (1+(rate/(12*100)))**(-timeinmonths)
     onem = 1 - oner
-    oned = onem/(rate/12)
-    #print(oner, onem, oned, principal, rate, time)
-    return round(principal/oned, 2)
+    oned = onem/(rate/(12*100))
+    print(oner, onem, oned, principal, rate, time)
+    data = {}
+    rprincipal = principal
+    fixedpayment = round(principal/oned, 2)
+    for months in range(timeinmonths):
+        monthlyinterest = mip(rprincipal, rate)
+        monthlypayment = fixedpayment # + monthlyinterest
+        data.update({months:[round(principal, 2), round(rprincipal,2), round(fixedpayment, 2), 
+                round(monthlyinterest,2), round(monthlypayment, 2)]})
+        rprincipal -= (fixedpayment - monthlyinterest)
+
+    return data #round(principal/oned, 2)
 
 #def annuitymortgage():
