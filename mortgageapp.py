@@ -4,7 +4,7 @@ import dash_html_components as html
 import plotly.express as px
 import pandas as pd
 from dash.dependencies import Input, Output
-from mortgagecalc import linearmortgage, annuity
+from mortgagecalc import linearmortgage, annuity, interestbounds
 import dash_table 
 import pandas
 import pdb
@@ -21,15 +21,19 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = html.Div( className='test',
             children=
         [    
-        html.Label('Mortgage Amount', id='mortamount'),
+        html.Label('Every month I can contribute the following amount towards my mortgage', id='contributionheader'),
+        dcc.Input(value=0, id='mip'),
+        html.Label('That amount can vary by', id='variation'),
+        dcc.Input(value=0, id='limits'),
+        html.Label('The house I want to buy costs (assume 100% mortgage)', id='mortamount'),
         dcc.Input(value=0, id="mortgageamount", type='number'),
-        html.Label('Interest Rate', id='intrate'),
-        dcc.Input(value=1.9, id='interestrate', type='number'),
-        html.Label('Years of repayment', id='yearrepay'),
+        #html.Label('Interest Rate', id='intrate'),
+        #dcc.Input(value=1.9, id='interestrate', type='number'),
+        html.Label('I want a term of', id='yearrepay'),
         dcc.Input(value=30, id='repaymentyears', type='number', debounce=True)]
-        +[html.Label('Total Interest'), html.Div(id='total_interest')]
-        + [html.Label('First Monthly Payment'), html.Div(id='first_monthly_payment')]
-        + [html.Label('Last Monthly Payment'), html.Div(id='last_monthly_payment')]
+        +[html.Label('Your options are:'), html.Div(id='information')]
+        #+ [html.Label('First Monthly Payment'), html.Div(id='first_monthly_payment')]
+        #+ [html.Label('Last Monthly Payment'), html.Div(id='last_monthly_payment')]
 
 #+ [html.Label(''), html.Div(id='test')]
         #+[dcc.Graph(id='graph', )]
@@ -40,27 +44,32 @@ app.layout = html.Div( className='test',
 
 @app.callback(
    # Output("table", "data"),
-    Output("total_interest", "children"),
-    Output("first_monthly_payment", "children"),
-    Output("last_monthly_payment", "children"),
+    Output("information", "children"),
+  #  Output("first_monthly_payment", "children"),
+  #  Output("last_monthly_payment", "children"),
     
    # Output("table", "rows"),
-    [Input("mortgageamount", "value"), Input('interestrate', "value"), 
+    [Input("mortgageamount", "value"), Input('mip', "value"), Input('limits', "value"),
         Input('repaymentyears', "value") ]
     
 )
-def cb_render(mortgageamount,interestrate, repaymentyears):
+def cb_render(mortgageamount,mip, repaymentyears, limits):
     print(mortgageamount)
+    mip = float(mip)
+    mortgageamount = float(mortgageamount)
+    repaymentyears = int(float(repaymentyears))
+    limits= float(limits)
     if mortgageamount is None or mortgageamount == 0:
         print("It also enters here")
         return 0, 0, 0 
     else:
-        df = pandas.DataFrame(linearmortgage(mortgageamount, rate=interestrate, time=repaymentyears)).T
-        df.columns = ['principal', 'rprincipal', 'fixedpayment', 
-                        'monthlyinterest', 'monthlypayment']
+        df = pandas.DataFrame(interestbounds(mortgageamount, repaymentyears, mip, limits))
+        #df.columns = ['principal', 'rprincipal', 'fixedpayment', 
+        #                'monthlyinterest', 'monthlypayment']
+
         print("here we are ")
-        print(df)
-        return df['monthlyinterest'].sum(), df['monthlypayment'][0], df['monthlypayment'].iloc[-1]
+        return df.iloc[0]
+        #return df['monthlyinterest'].sum(), df['monthlypayment'][0], df['monthlypayment'].iloc[-1]
 
 
 
